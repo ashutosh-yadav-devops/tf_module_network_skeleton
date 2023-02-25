@@ -1,18 +1,54 @@
 version: 2.1
-orbs:
-  terraform: circleci/terraform@3.2.0
+jobs:
+  terraform-validate:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run:
+          name: "Terraform init"
+          command: "terraform init"
+      - run:
+          name: "Terraform validate"
+          command: "terraform validate"
+  terraform-plan:
+    docker: 
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run:
+          name: "Terraform init"
+          command: "terraform init"
+      - run:
+          name: "Terraform plan"
+          command: "terraform plan"
+  terraform-apply:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run:
+          name: "Terraform init"
+          command: "terraform init"
+      - run:
+          name: "Terraform apply"
+          command: "terraform apply -auto-approve"
+
 workflows:
-  deploy_infrastructure:
+  infra-creation:
     jobs:
-    - terraform/plan:
-        checkout: true
-        context: terraform
-        persist-workspace: true
-    - terraform/apply:
-        attach-workspace: true
-        context: terraform
-        filters:
-          branches:
-            only: main
-        requires:
-        - terraform/plan
+      - terraform-validate:
+          context: terraform
+      - terraform-plan:
+          context: terraform
+          requires:
+            - terraform-validate
+      - terraform-apply:
+          context: terraform
+          requires:
+            - terraform-plan
+          filters:
+            branches:
+              only: main
+
+
