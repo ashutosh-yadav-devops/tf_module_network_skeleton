@@ -209,7 +209,7 @@ variable "open_vpn_details" {
   default = {
   ami           = "ami-06878d265978313ca"
   instance_type = "t2.micro"
-  key_name      = "aws-key"
+  key_name      = "jenkins"
 
 }
   description = "Here ami should be of vpn server"
