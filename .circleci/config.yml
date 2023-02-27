@@ -32,7 +32,7 @@ jobs:
           command: "terraform init"
       - run:
           name: "Terraform apply"
-          command: "terraform destroy -auto-approve"
+          command: "terraform apply"
 
 workflows:
   infra-creation:
@@ -50,5 +50,6 @@ workflows:
           filters:
             branches:
               only: main
+
 
 
