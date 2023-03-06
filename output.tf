@@ -86,11 +86,3 @@ output "name_servers" {
   value       = aws_route53_zone.dns.name_servers
   description = "List of name servers"
 }
-output "web_app_sg_id" {
-  value = aws_security_group.web_app_sg.id
-  description = "Common security Group for all web application"
-}
-output "vpn_server_public_ip" {
-  value = length(aws_eip.eip_vpn_server) > 0 ? aws_eip.eip_vpn_server[0].public_ip : ""
-  description = "Elastic IP of VPN server"
-}

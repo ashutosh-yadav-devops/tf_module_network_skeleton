@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "ot-avengers-terraform-state-locking"
-    key            = "test/circleci/network_skeleton/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-state-locking"
-    encrypt        = true
+    bucket = "snaatak-avengers-terraform-state-locking"
+    key    = "test/s3/dev_apps_attendance_terraform.tfstate"
+    region = "us-east-1"
+    dynamodb_table = "terraform-state-locking" 
+    encrypt = true
   }
 }

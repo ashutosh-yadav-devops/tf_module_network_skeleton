@@ -13,7 +13,7 @@ Terraform network skeleton module will create following resources
 - Security group for internet facing application loadbalancer **Optional**
 - Internal application loadbalancer with its target group and listener **Optional**
 - Security group for internal application loadbalancer **Optional**
-- VPN Server **Optional**
+- Open VPN Server **Optional**
 - Route53 zone
 
 ## Module should be used in following way

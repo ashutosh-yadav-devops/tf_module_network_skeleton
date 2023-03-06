@@ -1,55 +1,89 @@
-version: 2.1
+version: '2.1'
+orbs:
+  slack: circleci/slack@4.1
+executors:
+  default:
+    docker:
+      - image: 'hashicorp/terraform:latest'
+    resource_class: medium
+commands:
+  terraform:
+    parameters:
+      command:
+        default: ""
+        type: string
+    steps:
+      - run:
+          name: Terraform <<parameters.command>>
+          command: terraform <<parameters.command>>
+
+
 jobs:
-  terraform-validate:
+  gitleaks:
     docker:
-      - image: hashicorp/terraform:latest
+      - image: 'zricethezav/gitleaks'
     steps:
       - checkout
       - run:
-          name: "Terraform init"
-          command: "terraform init"
-      - run:
-          name: "Terraform validate"
-          command: "terraform validate"
-  terraform-plan:
-    docker: 
-      - image: hashicorp/terraform:latest
+          name: 'Credentials scanning'
+          command: gitleaks detect -v -f .
+      - slack/notify:
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+  validation:
+    executor: default
     steps:
       - checkout
-      - run:
-          name: "Terraform init"
-          command: "terraform init"
-      - run:
-          name: "Terraform plan"
-          command: "terraform plan"
-  terraform-apply:
-    docker:
-      - image: hashicorp/terraform:latest
+      - terraform:
+          command: init
+      - terraform:
+          command: validate
+  terraform_plan:
+    executor: default
     steps:
       - checkout
-      - run:
-          name: "Terraform init"
-          command: "terraform init"
-      - run:
-          name: "Terraform apply"
-          command: "terraform apply"
+      - terraform:
+          command: init
+      - terraform:
+          command: plan
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  terraform_apply:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - terraform:
+          command: apply
+
 
 workflows:
   infra-creation:
     jobs:
-      - terraform-validate:
-          context: terraform
-      - terraform-plan:
-          context: terraform
+      - gitleaks:
+          context: slack
+      - validation:
           requires:
-            - terraform-validate
-      - terraform-apply:
-          context: terraform
+            - gitleaks
+      - terraform_plan:
+          context:
+            - slack
+            - AWS-CREDENTIALS
           requires:
-            - terraform-plan
+            - gitleaks
+            - validation
+      - terraform_apply:
+          context:
+            - slack
+            - AWS-CREDENTIALS
+          requires:
+            - terraform_plan
           filters:
             branches:
-              only: main
-
-
+              only: 
+              - Dev
+              - main
 
